@@ -1,0 +1,53 @@
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+genrule(
+    name = "_nvim_test_runner",
+    outs = ["_nvim_test_runner.sh"],
+    cmd = """cat > $@ << 'SCRIPT'
+#!/usr/bin/env bash
+set -euo pipefail
+cd "$$TEST_SRCDIR/$$TEST_WORKSPACE"
+MINI="$$HOME/.local/share/nvim/lazy/mini.nvim"
+if [ ! -d "$$MINI" ]; then
+  echo "ERROR: mini.nvim not found at $$MINI" >&2
+  exit 1
+fi
+if [ "$$#" -gt 0 ]; then
+  RUN_CMD="lua MiniTest.run_file('$$1')"
+else
+  RUN_CMD="lua MiniTest.run()"
+fi
+exec nvim --headless --noplugin -u NONE \
+  -c "set rtp+=." \
+  -c "set rtp+=$$MINI" \
+  -c "lua MiniTest = require('mini.test')" \
+  -c "lua MiniTest.setup({ execute = { reporter = MiniTest.gen_reporter.stdout({ group_depth = 2 }) } })" \
+  -c "$$RUN_CMD" \
+  -c "qa!"
+SCRIPT
+chmod +x $@
+""",
+)
+
+sh_test(
+    name = "test_swap_handler",
+    srcs = [":_nvim_test_runner"],
+    args = ["tests/test_swap_handler.lua"],
+    data = glob([
+        "lua/**/*.lua",
+        "tests/**/*.lua",
+    ]),
+    env_inherit = ["HOME"],
+    tags = ["local"],
+)
+
+sh_test(
+    name = "test_all",
+    srcs = [":_nvim_test_runner"],
+    data = glob([
+        "lua/**/*.lua",
+        "tests/**/*.lua",
+    ]),
+    env_inherit = ["HOME"],
+    tags = ["local"],
+)
