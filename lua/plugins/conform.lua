@@ -109,7 +109,7 @@ return {
 	opts = {
 		formatters_by_ft = {
 			lua = { "stylua" },
-			python = { "isort", "black" },
+			python = { "ruff_organize_imports", "ruff_format" },
 			rust = { "rustfmt" },
 			javascript = { "prettier" },
 			typescript = { "prettier" },
@@ -138,6 +138,10 @@ return {
 			},
 			clang_format = {
 				prepend_args = { "--style=file" },
+				-- only format C/C++ in projects that ship a .clang-format
+				condition = function(_, ctx)
+					return vim.fs.root(ctx.filename, ".clang-format") ~= nil
+				end,
 			},
 		},
 	},

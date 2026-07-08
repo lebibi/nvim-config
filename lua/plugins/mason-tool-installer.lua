@@ -11,6 +11,7 @@ return {
 			"clang-format",
 			"buildifier",
 			"flake8",
+			"ruff",
 			"mypy",
 			"luacheck",
 			"eslint_d",

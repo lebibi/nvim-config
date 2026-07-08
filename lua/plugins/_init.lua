@@ -1,5 +1,4 @@
 return {
-	{ import = "plugins.99" },
 	{ import = "plugins.additional-themes" },
 	{ import = "plugins.bufferline" },
 	{ import = "plugins.claude-code" },
@@ -23,6 +22,7 @@ return {
 	{ import = "plugins.persistence" },
 	{ import = "plugins.render-markdown" },
 	{ import = "plugins.snacks" },
+	{ import = "plugins.smart-splits" },
 	{ import = "plugins.telescope" },
 	{ import = "plugins.todo-comments" },
 	{ import = "plugins.tokyonight" },
@@ -31,6 +31,5 @@ return {
 	{ import = "plugins.vim-be-good" },
 	{ import = "plugins.vim-fugitive" },
 	{ import = "plugins.vim-sleuth" },
-	{ import = "plugins.vim-tmux-navigator" },
 	{ import = "plugins.whichkey" },
 }

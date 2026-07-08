@@ -5,7 +5,7 @@ return {
 		local lint = require("lint")
 
 		lint.linters_by_ft = {
-			python = { "flake8", "mypy" },
+			python = { "ruff", "mypy" },
 			lua = { "luacheck" },
 			javascript = { "eslint_d" },
 			typescript = { "eslint_d" },
@@ -20,10 +20,14 @@ return {
 		}
 
 		lint.linters.buildifier.args = {
-			"-lint", "warn",
-			"-mode", "check",
-			"-format", "json",
-			"-type", function()
+			"-lint",
+			"warn",
+			"-mode",
+			"check",
+			"-format",
+			"json",
+			"-type",
+			function()
 				local fname = vim.fn.expand("%:t"):lower()
 				if fname == "module.bazel" then
 					return "module"
@@ -31,7 +35,11 @@ return {
 					return "bzl"
 				elseif fname == "build" or vim.startswith(fname, "build.") or vim.endswith(fname, ".build") then
 					return "build"
-				elseif fname == "workspace" or vim.startswith(fname, "workspace.") or vim.endswith(fname, ".workspace") then
+				elseif
+					fname == "workspace"
+					or vim.startswith(fname, "workspace.")
+					or vim.endswith(fname, ".workspace")
+				then
 					return "workspace"
 				else
 					return "default"
