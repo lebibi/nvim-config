@@ -1,7 +1,6 @@
 return {
 	{ import = "plugins.additional-themes" },
 	{ import = "plugins.bufferline" },
-	{ import = "plugins.claude-code" },
 	{ import = "plugins.cmp" },
 	{ import = "plugins.conform" },
 	{ import = "plugins.dap" },
