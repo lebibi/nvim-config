@@ -51,6 +51,53 @@ return {
 				end
 
 				local conform = require("conform")
+				local swap_handler = require("util.swap_handler")
+
+				local function find_swap_for(path)
+					local resolved = vim.fn.resolve(path)
+					for _, s in ipairs(vim.fn.swapfilelist()) do
+						local info = vim.fn.swapinfo(s)
+						if info and info.fname and vim.fn.resolve(info.fname) == resolved then
+							return s
+						end
+					end
+				end
+
+				-- bufload may hit E325 (swap exists). Route through the same
+				-- handler the global SwapExists autocmd uses so the user gets
+				-- the familiar prompt instead of a hard failure.
+				local function load_buffer(path, buf)
+					local ok, err = pcall(vim.fn.bufload, buf)
+					if ok then
+						return "loaded"
+					end
+					if not tostring(err):match("E325") then
+						return "error", err
+					end
+					local swap = find_swap_for(path)
+					if not swap then
+						return "error", err
+					end
+					local choice = swap_handler.handle_swap(swap)
+					if choice == "d" then
+						vim.fn.delete(swap)
+						local ok2, err2 = pcall(vim.fn.bufload, buf)
+						return ok2 and "loaded" or "error", err2
+					elseif choice == "e" then
+						-- Edit anyway: same mechanic v:swapchoice='e' uses
+						-- internally — bypass the swap check for this load only.
+						local saved = vim.o.swapfile
+						vim.o.swapfile = false
+						local ok2, err2 = pcall(vim.fn.bufload, buf)
+						vim.o.swapfile = saved
+						return ok2 and "loaded" or "error", err2
+					elseif choice == "a" then
+						return "abort"
+					else
+						return "skip", "swap (" .. choice .. ")"
+					end
+				end
+
 				local formatted, no_formatter, missing, errored = 0, {}, {}, {}
 				for _, rel_path in ipairs(unique) do
 					local path = git_root .. "/" .. rel_path
@@ -59,32 +106,40 @@ return {
 						table.insert(missing, rel_path .. (stat and (" (" .. stat.type .. ")") or " (gone)"))
 					else
 						local buf = vim.fn.bufadd(path)
-						vim.fn.bufload(buf)
-						if vim.bo[buf].filetype == "" then
-							local ft = vim.filetype.match({ buf = buf, filename = path })
-							if ft then
-								vim.bo[buf].filetype = ft
-							end
-						end
-						local formatters = conform.list_formatters_for_buffer(buf)
-						if #formatters == 0 then
-							table.insert(no_formatter, rel_path)
+						local status, status_err = load_buffer(path, buf)
+						if status == "abort" then
+							break
+						elseif status == "skip" then
+							table.insert(errored, rel_path .. ": " .. tostring(status_err))
+						elseif status == "error" then
+							table.insert(errored, rel_path .. ": " .. tostring(status_err))
 						else
-							local ok, err = pcall(conform.format, {
-								bufnr = buf,
-								async = false,
-								timeout_ms = 5000,
-							})
-							if not ok then
-								table.insert(errored, rel_path .. ": " .. tostring(err))
+							if vim.bo[buf].filetype == "" then
+								local ft = vim.filetype.match({ buf = buf, filename = path })
+								if ft then
+									vim.bo[buf].filetype = ft
+								end
+							end
+							local formatters = conform.list_formatters_for_buffer(buf)
+							if #formatters == 0 then
+								table.insert(no_formatter, rel_path)
 							else
-								local wrote_ok = pcall(vim.api.nvim_buf_call, buf, function()
-									vim.cmd("silent! noautocmd write")
-								end)
-								if wrote_ok then
-									formatted = formatted + 1
+								local ok, err = pcall(conform.format, {
+									bufnr = buf,
+									async = false,
+									timeout_ms = 5000,
+								})
+								if not ok then
+									table.insert(errored, rel_path .. ": " .. tostring(err))
 								else
-									table.insert(errored, rel_path .. ": write failed")
+									local wrote_ok = pcall(vim.api.nvim_buf_call, buf, function()
+										vim.cmd("silent! noautocmd write")
+									end)
+									if wrote_ok then
+										formatted = formatted + 1
+									else
+										table.insert(errored, rel_path .. ": write failed")
+									end
 								end
 							end
 						end
