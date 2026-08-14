@@ -164,7 +164,28 @@ return {
 	opts = {
 		formatters_by_ft = {
 			lua = { "stylua" },
-			python = { "ruff_organize_imports", "ruff_format" },
+			-- Projects that run black in CI must be formatted with black, not
+			-- ruff_format: ruff reads [tool.ruff] line-length (often 100) while
+			-- black defaults to 88, so ruff-formatted files fail `black --check`.
+			python = function(bufnr)
+				local name = vim.api.nvim_buf_get_name(bufnr)
+				local root = vim.fs.root(name ~= "" and name or vim.uv.cwd(), {
+					"pyproject.toml",
+					".pre-commit-config.yaml",
+					"setup.cfg",
+				})
+				for _, file in ipairs({ "pyproject.toml", ".pre-commit-config.yaml", "setup.cfg" }) do
+					local fd = root and io.open(root .. "/" .. file, "r")
+					if fd then
+						local content = fd:read("*a")
+						fd:close()
+						if content:find("black", 1, true) then
+							return { "isort", "black" }
+						end
+					end
+				end
+				return { "ruff_organize_imports", "ruff_format" }
+			end,
 			rust = { "rustfmt" },
 			javascript = { "prettier" },
 			typescript = { "prettier" },
@@ -190,6 +211,10 @@ return {
 		formatters = {
 			shfmt = {
 				prepend_args = { "-i", "2" },
+			},
+			-- matches the `isort --profile black` used by pre-commit hooks
+			isort = {
+				prepend_args = { "--profile", "black" },
 			},
 			clang_format = {
 				prepend_args = { "--style=file" },
