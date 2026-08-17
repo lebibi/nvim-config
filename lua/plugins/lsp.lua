@@ -3,19 +3,23 @@ return {
 	dependencies = { "williamboman/mason.nvim", "williamboman/mason-lspconfig.nvim" },
 	config = function()
 		require("mason").setup()
+		-- automatic_enable defaults to true, which also attaches bzl (Starlark, like
+		-- starpls) and ruff (Python, like pyright), so diagnostics arrive twice.
 		require("mason-lspconfig").setup({
 			ensure_installed = { "pyright", "clangd", "rust_analyzer", "starpls" },
-			handlers = {
-				function(server_name)
-					vim.lsp.enable(server_name)
-				end,
-			},
+			automatic_enable = { "clangd", "pyright", "rust_analyzer", "starpls" },
 		})
 
 		vim.lsp.config.clangd = {
 			cmd = {
 				"clangd",
 				"--background-index",
+				-- nvim writes every stderr byte to its log synchronously on the main
+				-- thread, and clangd's default logging put 23 MB through it in one run.
+				"--log=error",
+				-- Keep a cold bazel index from competing with the editor for CPU.
+				"--background-index-priority=low",
+				"--malloc-trim",
 				"--fallback-style=webkit",
 				"--query-driver=/usr/bin/clang++",
 				"--clang-tidy",
@@ -46,6 +50,10 @@ return {
 						autoSearchPaths = true,
 						useLibraryCodeForTypes = true,
 						diagnosticMode = "workspace",
+						-- bazel-* symlinks hold generated copies of the whole tree, so
+						-- pyright indexes the repo several times and completion offers
+						-- every copy.
+						exclude = { "**/bazel-*", "**/.cache", "**/node_modules", "**/.venv" },
 					},
 				},
 			},
@@ -80,6 +88,23 @@ return {
 				},
 			},
 		}
+
+		-- Kill any surviving servers on the way out. nvim exits without waiting for
+		-- them (exit_timeout defaults to false) and never checks they went.
+		--
+		-- Straight at the transport, because nvim's own VimLeavePre handler runs
+		-- first and marks clients stopping, so Client:stop() would return early. Not
+		-- ExitPre, which also fires on quits that get aborted.
+		vim.api.nvim_create_autocmd("VimLeavePre", {
+			group = vim.api.nvim_create_augroup("LspReapOnExit", { clear = true }),
+			callback = function()
+				for _, client in ipairs(vim.lsp.get_clients()) do
+					pcall(function()
+						client.rpc.terminate()
+					end)
+				end
+			end,
+		})
 
 		vim.api.nvim_create_autocmd("LspAttach", {
 			callback = function(event)
