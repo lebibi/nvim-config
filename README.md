@@ -6,21 +6,40 @@ A personal Neovim setup built on Lazy.nvim, focused on C/C++, Python, Rust, and 
 
 ### Prerequisites
 
-Mason handles LSP servers, formatters, and linters automatically — but it needs a few system packages to do its thing.
+This configuration requires Neovim 0.12 or newer. Mason installs the configured
+LSP servers, formatters, and linters, but it relies on system runtimes to install
+some packages.
 
-**Install Node via nvm**
+**Install Node.js and npm with nvm**
+
+npm is included with Node.js. Do not install npm separately. Install the current
+Node.js LTS release and the latest npm version compatible with it:
 
 ```sh
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
-nvm install --lts
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.6/install.sh | bash
 ```
 
-Then install the remaining dependencies:
+Restart the shell, then run:
+
+```sh
+nvm install --lts --latest-npm
+node --version
+npm --version
+```
+
+Mason uses Node and npm for tools such as `pyright`, `prettier`, `eslint_d`, and
+`markdownlint-cli2`.
+
+**Install the remaining dependencies**
+
+Python 3.10 or newer is required for Mason packages such as `black`, `isort`,
+`mypy`, and `yamllint`. The `nvim-treesitter` main branch requires
+`tree-sitter-cli` 0.26.1 or newer.
 
 **Arch:**
 
 ```sh
-sudo pacman -S --needed git ripgrep python python-pip luarocks clang unzip curl xclip
+sudo pacman -S --needed git ripgrep python python-pip tree-sitter-cli luarocks clang unzip curl xclip
 ```
 
 **Ubuntu/Debian:**
@@ -29,10 +48,27 @@ sudo pacman -S --needed git ripgrep python python-pip luarocks clang unzip curl 
 sudo apt install git ripgrep python3 python3-pip python3-venv luarocks clang unzip curl xclip
 ```
 
+Install `tree-sitter-cli` 0.26.1 or newer with the system package manager and
+confirm the installed version with `tree-sitter --version`.
+
 **macOS:**
 
 ```sh
-brew install git ripgrep python luarocks llvm unzip curl
+brew install git ripgrep python tree-sitter-cli luarocks llvm unzip curl
+```
+
+Homebrew must appear before `/usr/bin` so Mason finds Homebrew Python instead of
+Apple's older system Python. Add this to `~/.zprofile`:
+
+```sh
+eval "$(/opt/homebrew/bin/brew shellenv)"
+```
+
+Restart the shell and verify the runtimes:
+
+```sh
+python3 --version
+tree-sitter --version
 ```
 
 **Rust toolchain (optional, only if you edit Rust):**
@@ -53,6 +89,19 @@ git clone <repo-url> ~/.config/nvim
 ```
 
 Then just open Neovim — Lazy.nvim bootstraps itself and installs everything on first launch.
+
+To install any missing Mason tools manually and wait for completion:
+
+```vim
+:MasonToolsInstallSync
+```
+
+Markdown rendering depends on the `markdown` and `markdown_inline` Tree-sitter
+parsers. Check it with:
+
+```vim
+:checkhealth render-markdown
+```
 
 ---
 

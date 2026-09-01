@@ -1,8 +1,13 @@
 return {
 	"nvim-treesitter/nvim-treesitter",
+	branch = "main",
+	lazy = false,
 	build = ":TSUpdate",
-	opts = {
-		ensure_installed = {
+	config = function()
+		local treesitter = require("nvim-treesitter")
+
+		treesitter.setup({})
+		treesitter.install({
 			"bash",
 			"cpp",
 			"dockerfile",
@@ -21,9 +26,31 @@ return {
 			"typescript",
 			"vim",
 			"yaml",
-		},
-		highlight = { enable = true },
-		incremental_selection = { enable = true },
-		indent = { enable = false },
-	},
+		})
+
+		vim.api.nvim_create_autocmd("FileType", {
+			pattern = {
+				"sh",
+				"cpp",
+				"dockerfile",
+				"helm",
+				"html",
+				"javascript",
+				"json",
+				"lua",
+				"markdown",
+				"python",
+				"query",
+				"regex",
+				"rust",
+				"typescriptreact",
+				"typescript",
+				"vim",
+				"yaml",
+			},
+			callback = function()
+				vim.treesitter.start()
+			end,
+		})
+	end,
 }
