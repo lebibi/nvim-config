@@ -34,18 +34,20 @@ Mason uses Node and npm for tools such as `pyright`, `prettier`, `eslint_d`, and
 
 Python 3.10 or newer is required for Mason packages such as `black`, `isort`,
 `mypy`, and `yamllint`. The `nvim-treesitter` main branch requires
-`tree-sitter-cli` 0.26.1 or newer.
+`tree-sitter-cli` 0.26.1 or newer. Image rendering needs ImageMagick and a
+terminal that speaks the kitty graphics protocol (kitty, WezTerm, Ghostty) or
+Überzug++ elsewhere.
 
 **Arch:**
 
 ```sh
-sudo pacman -S --needed git ripgrep python python-pip tree-sitter-cli luarocks clang unzip curl xclip
+sudo pacman -S --needed git ripgrep python python-pip tree-sitter-cli luarocks clang unzip curl xclip imagemagick
 ```
 
 **Ubuntu/Debian:**
 
 ```sh
-sudo apt install git ripgrep python3 python3-pip python3-venv luarocks clang unzip curl xclip
+sudo apt install git ripgrep python3 python3-pip python3-venv luarocks clang unzip curl xclip imagemagick
 ```
 
 Install `tree-sitter-cli` 0.26.1 or newer with the system package manager and
@@ -54,7 +56,7 @@ confirm the installed version with `tree-sitter --version`.
 **macOS:**
 
 ```sh
-brew install git ripgrep python tree-sitter-cli luarocks llvm unzip curl
+brew install git ripgrep python tree-sitter-cli luarocks llvm unzip curl imagemagick
 ```
 
 Homebrew must appear before `/usr/bin` so Mason finds Homebrew Python instead of
@@ -143,6 +145,8 @@ flake8, mypy, luacheck, eslint_d, shellcheck, markdownlint-cli2, yamllint, build
 - **Lualine** — status line
 - **Bufferline** — tabbed buffers
 - **Render-markdown** — renders markdown right in the buffer
+- **Snacks.image** — renders images in the terminal: open a `png`/`jpg`/`gif`/
+  `svg`/`pdf` directly, or see markdown and LaTeX images inline
 - **Indent-blankline** — indentation guides
 
 ### Other Useful Stuff

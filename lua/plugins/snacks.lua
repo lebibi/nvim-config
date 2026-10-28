@@ -26,6 +26,18 @@ return {
 			},
 		},
 		input = { enabled = true },
+		image = {
+			enabled = true,
+			doc = {
+				inline = true,
+				float = true,
+				-- false bounds images by the window alone.
+				max_width = false,
+				max_height = false,
+			},
+			math = { enabled = true },
+			convert = { notify = true },
+		},
 		styles = {
 			notification = {
 				wo = { wrap = true },
@@ -40,6 +52,7 @@ return {
 		{ "<leader>gf", function() require("snacks").lazygit.log_file() end, desc = "Lazygit Current File History" },
 		{ "<leader>gl", function() require("snacks").lazygit.log() end, desc = "Lazygit Log" },
 		{ "<leader>cR", function() require("snacks").rename.rename_file() end, desc = "Rename File" },
+		{ "<leader>ui", function() require("snacks").image.hover() end, desc = "Image at Cursor (float)" },
 		{ "<c-/>", function() require("snacks").terminal() end, desc = "Toggle Terminal" },
 		{ "<c-_>", function() require("snacks").terminal() end, desc = "Toggle Terminal (alternative)" },
 	},
