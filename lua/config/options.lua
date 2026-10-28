@@ -1,6 +1,28 @@
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.clipboard = "unnamedplus"
+
+-- Over ssh, yank to the local clipboard with OSC 52
+-- Paste the last yank, as reading the clipboard makes kitty prompt on every p
+if vim.env.SSH_TTY or vim.env.SSH_CONNECTION then
+	local osc52 = require("vim.ui.clipboard.osc52")
+	local last = { {}, "v" }
+	local function copy(reg)
+		local send = osc52.copy(reg)
+		return function(lines, regtype)
+			last = { lines, regtype }
+			send(lines, regtype)
+		end
+	end
+	local function paste()
+		return last
+	end
+	vim.g.clipboard = {
+		name = "OSC 52",
+		copy = { ["+"] = copy("+"), ["*"] = copy("*") },
+		paste = { ["+"] = paste, ["*"] = paste },
+	}
+end
 vim.o.autoread = true
 
 vim.opt.scrolloff = 5
