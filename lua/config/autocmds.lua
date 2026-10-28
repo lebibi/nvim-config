@@ -11,8 +11,18 @@ vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter", "CursorHold" }, {
 	command = "silent! checktime",
 })
 
+vim.keymap.set({ "i", "n", "s" }, "<Esc>", function()
+	vim.cmd("noh")
+	return "<Esc>"
+end, { expr = true, desc = "Escape and clear hlsearch" })
+
+-- Select mode replaces the selection with the next typed character.
+for _, lhs in ipairs({ "gh", "gH", "g<C-h>" }) do
+	vim.keymap.set("n", lhs, "<Nop>", { desc = "Disabled (was: start Select mode)" })
+end
+
 -- Toggle scrollbind on all normal windows (skips any special buftype like neo-tree, help, etc.)
-vim.keymap.set("n", "<leader>sb", function()
+vim.keymap.set("n", "<leader>ub", function()
 	local enable = not vim.wo.scrollbind
 	for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
 		local buf = vim.api.nvim_win_get_buf(win)

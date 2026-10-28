@@ -34,6 +34,5 @@ return {
 			end,
 			desc = "Go to right split",
 		},
-		{ "<leader>h", "<cmd>noh<CR>", desc = "Clear search highlights" },
 	},
 }

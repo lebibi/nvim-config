@@ -48,10 +48,13 @@ sudo pacman -S --needed git ripgrep python python-pip tree-sitter-cli luarocks c
 
 ```sh
 sudo apt install git ripgrep python3 python3-pip python3-venv luarocks clang unzip curl xclip imagemagick
+npm install -g --allow-scripts=tree-sitter-cli tree-sitter-cli@latest
 ```
 
-Install `tree-sitter-cli` 0.26.1 or newer with the system package manager and
-confirm the installed version with `tree-sitter --version`.
+Ubuntu 24.04's `tree-sitter-cli` package is too old for the `nvim-treesitter`
+main branch. The npm command installs a current CLI and explicitly permits its
+binary installer, which npm 12 blocks by default. Confirm the installed version
+with `tree-sitter --version`.
 
 **macOS:**
 
@@ -169,6 +172,20 @@ flake8, mypy, luacheck, eslint_d, shellcheck, markdownlint-cli2, yamllint, build
 
 > **Note:** `gd` (go to definition), `grr` (references), `grn` (rename), and `K` (hover) are built-in Neovim 0.11+ LSP mappings — they're not defined here but work out of the box.
 
+Leader is `<space>`. Groups follow the LazyVim convention:
+
+| Prefix      | Group                | Holds                          |
+| ----------- | -------------------- | ------------------------------ |
+| `<leader>b` | buffer               | pin, close, delete             |
+| `<leader>c` | code                 | format, lint, symbols, rename  |
+| `<leader>d` | debug                | free, kept for nvim-dap        |
+| `<leader>f` | find/file            | files, buffers                 |
+| `<leader>g` | git                  | lazygit, blame, `gh*` hunks    |
+| `<leader>q` | quit/session         | restore, don't save            |
+| `<leader>s` | search               | grep, help, todos              |
+| `<leader>u` | ui/toggle            | notifications, markdown, image |
+| `<leader>x` | diagnostics/quickfix | Trouble panels, lists          |
+
 ### LSP & Code Navigation
 
 | Key     | Action                       |
@@ -185,7 +202,7 @@ flake8, mypy, luacheck, eslint_d, shellcheck, markdownlint-cli2, yamllint, build
 | Key          | Action                           |
 | ------------ | -------------------------------- |
 | `[d` / `]d`  | Previous / next diagnostic       |
-| `<leader>d`  | Show error details               |
+| `<leader>cd` | Line diagnostics                 |
 | `<leader>xx` | Toggle all diagnostics (Trouble) |
 | `<leader>xX` | Toggle buffer diagnostics        |
 | `<leader>cs` | Show symbols                     |
@@ -199,11 +216,71 @@ flake8, mypy, luacheck, eslint_d, shellcheck, markdownlint-cli2, yamllint, build
 | Key          | Action          |
 | ------------ | --------------- |
 | `<leader>ff` | Find files      |
-| `<leader>fg` | Live grep       |
 | `<leader>fb` | Find buffers    |
-| `<leader>fh` | Find help tags  |
 | `<leader>e`  | Toggle Neo-tree |
-| `<leader>o`  | Focus Neo-tree  |
+| `<leader>E`  | Focus Neo-tree  |
+
+### Search
+
+| Key          | Action                  |
+| ------------ | ----------------------- |
+| `<leader>sg` | Live grep               |
+| `<leader>sh` | Help tags               |
+| `<leader>st` | Todos                   |
+| `<leader>sT` | Todo / Fix / Fixme      |
+| `<Esc>`      | Clear search highlights |
+
+### Git
+
+| Key           | Action                           |
+| ------------- | -------------------------------- |
+| `<leader>gg`  | Lazygit                          |
+| `<leader>gl`  | Lazygit log                      |
+| `<leader>gf`  | Lazygit file history             |
+| `<leader>gb`  | Blame line                       |
+| `<leader>gB`  | Open in browser                  |
+| `<leader>ghs` | Stage hunk / selection (toggles) |
+| `<leader>ghS` | Stage entire buffer              |
+| `<leader>ghp` | Preview hunk                     |
+| `<leader>ghd` | Diff against index               |
+| `<leader>ghD` | Diff against last commit         |
+| `<leader>ghr` | Reset hunk (or selection)        |
+| `<leader>ghR` | Reset entire buffer              |
+| `<leader>ghB` | Blame entire file                |
+| `[h` / `]h`   | Previous / next hunk             |
+
+Hunk keys work in every buffer, untracked files included. Staging an untracked
+file runs `git add --intent-to-add` first. `gh`, `gH` and `g<C-h>`, which start
+Select mode, are mapped to `<Nop>`. `:unmap gh` restores `gh`.
+
+### UI & Toggles
+
+| Key          | Action                    |
+| ------------ | ------------------------- |
+| `<leader>un` | Dismiss all notifications |
+| `<leader>ud` | Toggle diagnostics        |
+| `<leader>um` | Toggle markdown rendering |
+| `<leader>ui` | Image at cursor (float)   |
+| `<leader>ub` | Toggle scrollbind         |
+
+### Buffers
+
+| Key          | Action                      |
+| ------------ | --------------------------- |
+| `<leader>bd` | Delete buffer               |
+| `<leader>bp` | Toggle pin                  |
+| `<leader>bP` | Delete non-pinned buffers   |
+| `<leader>bo` | Delete other buffers        |
+| `<leader>br` | Delete buffers to the right |
+| `<leader>bl` | Delete buffers to the left  |
+
+### Session
+
+| Key          | Action                  |
+| ------------ | ----------------------- |
+| `<leader>qs` | Restore session for cwd |
+| `<leader>ql` | Restore last session    |
+| `<leader>qd` | Stop saving the session |
 
 ### Neo-tree
 
@@ -217,11 +294,18 @@ flake8, mypy, luacheck, eslint_d, shellcheck, markdownlint-cli2, yamllint, build
 | `y` / `x` / `p` | Copy / cut / paste         |
 | `c` / `m`       | Copy / move                |
 | `R`             | Refresh                    |
+| `F`             | Format file or directory   |
 | `H`             | Toggle hidden files        |
 | `[g` / `]g`     | Previous / next git change |
 | `P`             | Toggle preview             |
 | `zc` / `ze`     | Close / expand all         |
 | `?`             | Help                       |
+
+`F` formats what the cursor sits on: a single file, or every changed or
+untracked file under a directory, recursively. Select several lines in visual
+mode to format that whole selection. The file list comes from git, so
+`.gitignore`d paths and `.git/` are skipped, and anything over 25 files asks
+first.
 
 ### Motion (Flash)
 
@@ -259,17 +343,16 @@ statuscolumn to toggle a fold.
 
 ### Misc
 
-| Key          | Action                 |
-| ------------ | ---------------------- |
-| `<leader>cf` | Format buffer          |
-| `<leader>cL` | Trigger linting        |
-| `<leader>mt` | Toggle markdown render |
-| `<c-/>`      | Toggle terminal        |
-| `<leader>gg` | Lazygit                |
-| `<leader>gb` | Git blame line         |
-| `<leader>gl` | Lazygit log            |
-| `<leader>bd` | Delete buffer          |
-| `<leader>cR` | Rename file            |
+| Key           | Action                         |
+| ------------- | ------------------------------ |
+| `<leader>cf`  | Format buffer                  |
+| `<leader>cF`  | Format all git-modified files  |
+| `<leader>cS`  | Format files with staged hunks |
+| `<leader>cL`  | Trigger linting                |
+| `<leader>cR`  | Rename file                    |
+| `<leader>co`  | Show code owners               |
+| `<c-/>`       | Toggle terminal                |
+| `<c-h/j/k/l>` | Move between splits            |
 
 ---
 

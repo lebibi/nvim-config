@@ -22,6 +22,14 @@ return {
 				},
 				opts = { skip = true },
 			},
+			-- Raised by a gitsigns bug in async.lua running(). Remove once fixed upstream.
+			{
+				filter = {
+					event = "msg_show",
+					find = "Not in async context",
+				},
+				opts = { skip = true },
+			},
 			{
 				filter = { event = "format_progress" },
 				view = "mini",

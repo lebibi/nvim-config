@@ -45,21 +45,83 @@ return {
 		},
 	},
 	keys = {
-		{ "<leader>un", function() require("snacks").notifier.hide() end, desc = "Dismiss All Notifications" },
-		{ "<leader>bd", function() require("snacks").bufdelete() end, desc = "Delete Buffer" },
-		{ "<leader>gg", function() require("snacks").lazygit() end, desc = "Lazygit" },
-		{ "<leader>gH", function() require("snacks").gitbrowse() end, desc = "Git Browse" },
-		{ "<leader>gf", function() require("snacks").lazygit.log_file() end, desc = "Lazygit Current File History" },
-		{ "<leader>gl", function() require("snacks").lazygit.log() end, desc = "Lazygit Log" },
-		{ "<leader>cR", function() require("snacks").rename.rename_file() end, desc = "Rename File" },
-		{ "<leader>ui", function() require("snacks").image.hover() end, desc = "Image at Cursor (float)" },
-		{ "<c-/>", function() require("snacks").terminal() end, desc = "Toggle Terminal" },
-		{ "<c-_>", function() require("snacks").terminal() end, desc = "Toggle Terminal (alternative)" },
+		{
+			"<leader>un",
+			function()
+				require("snacks").notifier.hide()
+			end,
+			desc = "Dismiss All Notifications",
+		},
+		{
+			"<leader>bd",
+			function()
+				require("snacks").bufdelete()
+			end,
+			desc = "Delete Buffer",
+		},
+		{
+			"<leader>gg",
+			function()
+				require("snacks").lazygit()
+			end,
+			desc = "Lazygit",
+		},
+		{
+			"<leader>gB",
+			function()
+				require("snacks").gitbrowse()
+			end,
+			desc = "Git Browse",
+		},
+		{
+			"<leader>gf",
+			function()
+				require("snacks").lazygit.log_file()
+			end,
+			desc = "Lazygit Current File History",
+		},
+		{
+			"<leader>gl",
+			function()
+				require("snacks").lazygit.log()
+			end,
+			desc = "Lazygit Log",
+		},
+		{
+			"<leader>cR",
+			function()
+				require("snacks").rename.rename_file()
+			end,
+			desc = "Rename File",
+		},
+		{
+			"<leader>ui",
+			function()
+				require("snacks").image.hover()
+			end,
+			desc = "Image at Cursor (float)",
+		},
+		{
+			"<c-/>",
+			function()
+				require("snacks").terminal()
+			end,
+			desc = "Toggle Terminal",
+		},
+		{
+			"<c-_>",
+			function()
+				require("snacks").terminal()
+			end,
+			desc = "Toggle Terminal (alternative)",
+		},
 	},
 	config = function(_, opts)
 		require("snacks").setup(opts)
 		require("util.notify").setup()
-		vim.api.nvim_create_user_command("Bd", function() require("snacks").bufdelete() end, {})
+		vim.api.nvim_create_user_command("Bd", function()
+			require("snacks").bufdelete()
+		end, {})
 		vim.cmd("cabbrev bd Bd")
 	end,
 	init = function()

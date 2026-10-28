@@ -131,8 +131,8 @@ return {
 			virtual_text = { prefix = "■" },
 		})
 
-		vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, { desc = "Show error details" })
-		vim.keymap.set("n", "<leader>cd", function()
+		vim.keymap.set("n", "<leader>cd", vim.diagnostic.open_float, { desc = "Line diagnostics" })
+		vim.keymap.set("n", "<leader>ud", function()
 			local enabled = vim.diagnostic.is_enabled()
 			vim.diagnostic.enable(not enabled)
 			vim.notify("Diagnostics " .. (enabled and "OFF" or "ON"))
