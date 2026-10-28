@@ -236,6 +236,23 @@ flake8, mypy, luacheck, eslint_d, shellcheck, markdownlint-cli2, yamllint, build
 | `gc` | Toggle line comment  |
 | `gb` | Toggle block comment |
 
+### Folding
+
+Folds come from the language server's folding ranges where it offers them, and
+from treesitter elsewhere. Files open unfolded. Click a chevron in the
+statuscolumn to toggle a fold.
+
+| Key  | Action                    |
+| ---- | ------------------------- |
+| `za` | Toggle fold under cursor  |
+| `zo` | Open fold                 |
+| `zc` | Close fold                |
+| `zR` | Open all folds            |
+| `zM` | Close all folds           |
+| `zj` | Jump to next fold start   |
+| `zk` | Jump to previous fold end |
+| `zv` | Open just enough to see   |
+
 ### Misc
 
 | Key          | Action                 |

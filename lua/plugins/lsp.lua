@@ -117,6 +117,13 @@ return {
 				bufmap("n", "gO", "<cmd>lua vim.lsp.buf.document_symbol()<cr>", "Document symbols")
 				bufmap({ "n", "x" }, "gq", "<cmd>lua vim.lsp.buf.format({async = true})<cr>", "Format code")
 				bufmap({ "i", "s" }, "<C-s>", "<cmd>lua vim.lsp.buf.signature_help()<cr>", "Signature help")
+
+				local client = vim.lsp.get_client_by_id(event.data.client_id)
+				if client and client:supports_method("textDocument/foldingRange") then
+					for _, win in ipairs(vim.fn.win_findbuf(event.buf)) do
+						vim.wo[win][0].foldexpr = "v:lua.vim.lsp.foldexpr()"
+					end
+				end
 			end,
 		})
 

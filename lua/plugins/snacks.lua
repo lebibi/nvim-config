@@ -10,7 +10,10 @@ return {
 			timeout = 3000,
 		},
 		quickfile = { enabled = true },
-		statuscolumn = { enabled = true },
+		statuscolumn = {
+			enabled = true,
+			folds = { open = true },
+		},
 		words = { enabled = true },
 		git = { enabled = true },
 		gitbrowse = { enabled = true },
