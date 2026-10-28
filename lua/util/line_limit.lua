@@ -84,20 +84,24 @@ local function prettier(start)
 	return extract(find_up(prettier_names, start), '"printWidth"%s*:%s*(%d+)', "printWidth%s*[:=]%s*(%d+)")
 end
 
-local function markdownlint(start)
-	local c = read(find_up(markdownlint_names, start))
+local function md013(path)
+	local c = read(path)
 	if not c then
 		return nil
 	end
 	-- Prefer MD013.line_length; fall back to a bare line-length / line_length key.
-	local md = c:find('["\']?MD013["\']?%s*[:=]')
+	local md = c:find("[\"']?MD013[\"']?%s*[:=]")
 	if md then
-		local n = c:sub(md, md + 400):match('["\']?line[_-]length["\']?%s*[:=]%s*(%d+)')
+		local n = c:sub(md, md + 400):match("[\"']?line[_-]length[\"']?%s*[:=]%s*(%d+)")
 		if n then
 			return tonumber(n)
 		end
 	end
-	return tonumber(c:match('["\']?line[_-]length["\']?%s*[:=]%s*(%d+)'))
+	return tonumber(c:match("[\"']?line[_-]length[\"']?%s*[:=]%s*(%d+)"))
+end
+
+local function markdownlint(start)
+	return md013(find_up(markdownlint_names, start))
 end
 
 -- Each entry: { fn(start) -> limit|nil, default = N }
@@ -145,7 +149,8 @@ add({ "markdown" }, {
 	fn = function(start)
 		return markdownlint(start) or prettier(start)
 	end,
-	default = 80,
+	-- Must match MD013 line_length in lua/plugins/nvim-lint.lua.
+	default = 90,
 })
 
 -- Match base_leader plus repeats of its last char and an optional `!`, so we
