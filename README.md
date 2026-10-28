@@ -121,6 +121,11 @@ Completion comes from nvim-cmp with LuaSnip for snippets.
 **Formatting** (via Conform, auto-runs on save with 500ms timeout):
 black, isort, rustfmt, clang-format, buildifier, stylua, prettier, shfmt
 
+`<leader>cF` formats every changed or untracked file, `<leader>cS` only files
+with staged hunks. Both format whole files and leave the result unstaged. An
+open buffer is reloaded from disk first. If it also has unsaved edits, you are
+asked which version to format.
+
 **Linting** (via nvim-lint, runs on BufEnter/BufWrite/InsertLeave):
 flake8, mypy, luacheck, eslint_d, shellcheck, markdownlint-cli2, yamllint, buildifier
 

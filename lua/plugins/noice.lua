@@ -22,6 +22,10 @@ return {
 				},
 				opts = { skip = true },
 			},
+			{
+				filter = { event = "format_progress" },
+				view = "mini",
+			},
 		},
 		lsp = {
 			override = {

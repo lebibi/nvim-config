@@ -29,25 +29,37 @@ chmod +x $@
 """,
 )
 
-sh_test(
-    name = "test_swap_handler",
+# The runner takes nvim from PATH and mini.nvim from HOME.
+_TEST_ENV = [
+    "HOME",
+    "PATH",
+]
+
+_TEST_DATA = glob([
+    "lua/**/*.lua",
+    "tests/**/*.lua",
+])
+
+[sh_test(
+    name = name,
     srcs = [":_nvim_test_runner"],
-    args = ["tests/test_swap_handler.lua"],
-    data = glob([
-        "lua/**/*.lua",
-        "tests/**/*.lua",
-    ]),
-    env_inherit = ["HOME"],
+    args = ["tests/%s.lua" % name],
+    data = _TEST_DATA,
+    env_inherit = _TEST_ENV,
     tags = ["local"],
-)
+) for name in [
+    "test_swap_handler",
+    "test_formattable",
+    "test_format_progress",
+    "test_format_files",
+    "test_format_report",
+    "test_project_hooks",
+]]
 
 sh_test(
     name = "test_all",
     srcs = [":_nvim_test_runner"],
-    data = glob([
-        "lua/**/*.lua",
-        "tests/**/*.lua",
-    ]),
-    env_inherit = ["HOME"],
+    data = _TEST_DATA,
+    env_inherit = _TEST_ENV,
     tags = ["local"],
 )

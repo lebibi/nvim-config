@@ -42,6 +42,7 @@ return {
 	},
 	config = function(_, opts)
 		require("snacks").setup(opts)
+		require("util.notify").setup()
 		vim.api.nvim_create_user_command("Bd", function() require("snacks").bufdelete() end, {})
 		vim.cmd("cabbrev bd Bd")
 	end,

@@ -63,6 +63,7 @@ return {
 					["m"] = "move",
 					["q"] = "close_window",
 					["R"] = "refresh",
+					["F"] = { "format_files", desc = "Format file or directory" },
 					["?"] = "show_help",
 				},
 			},
@@ -86,6 +87,22 @@ return {
 				},
 				use_libuv_file_watcher = true, -- Auto-refresh on file changes
 				commands = {
+					-- Neo-tree finds the `_visual` variant of a named command by its name.
+					format_files = function(state)
+						local node = state.tree:get_node()
+						if not node then
+							return
+						end
+						local path = node.path or node:get_id()
+						require("util.format_files").format_paths({ path }, "Format " .. vim.fn.fnamemodify(path, ":t"))
+					end,
+					format_files_visual = function(_, selected_nodes)
+						local paths = vim.tbl_map(function(node)
+							return node.path or node:get_id()
+						end, selected_nodes)
+						require("util.format_files").format_paths(paths, "Format selection")
+					end,
+
 					-- Vim fold-style commands (from neo-tree#445)
 					neotree_zo = function(state)
 						local node = state.tree:get_node()
@@ -96,7 +113,9 @@ return {
 					end,
 					neotree_zO = function(state)
 						local node = state.tree:get_node()
-						if not node then return end
+						if not node then
+							return
+						end
 						local stack = { node }
 						while next(stack) ~= nil do
 							local n = table.remove(stack)
@@ -112,7 +131,9 @@ return {
 					end,
 					neotree_zc = function(state)
 						local node = state.tree:get_node()
-						if not node then return end
+						if not node then
+							return
+						end
 						if node:has_children() and node:is_expanded() then
 							node:collapse()
 						else
@@ -126,7 +147,9 @@ return {
 					end,
 					neotree_zC = function(state)
 						local node = state.tree:get_node()
-						if not node then return end
+						if not node then
+							return
+						end
 						while node and node:get_depth() >= 2 do
 							if node:has_children() and node:is_expanded() then
 								node:collapse()
@@ -137,7 +160,9 @@ return {
 					end,
 					neotree_za = function(state)
 						local node = state.tree:get_node()
-						if not node then return end
+						if not node then
+							return
+						end
 						if node.type == "directory" and not node:is_expanded() then
 							require("neo-tree.sources.filesystem").toggle_directory(state, node, nil, true, false)
 						elseif node:has_children() and node:is_expanded() then
@@ -224,7 +249,9 @@ return {
 						-- Collect all git-changed nodes before current
 						local candidates = {}
 						for _, node in ipairs(all) do
-							if node:get_id() == cur_id then break end
+							if node:get_id() == cur_id then
+								break
+							end
 							if lookup[node:get_id()] then
 								table.insert(candidates, node)
 							end
@@ -235,11 +262,12 @@ return {
 						end
 					end,
 					expand_git_modified = function(state)
-						local handle = io.popen(string.format(
-							"git -C %s status --porcelain 2>/dev/null",
-							vim.fn.shellescape(state.path)
-						))
-						if not handle then return end
+						local handle = io.popen(
+							string.format("git -C %s status --porcelain 2>/dev/null", vim.fn.shellescape(state.path))
+						)
+						if not handle then
+							return
+						end
 						local output = handle:read("*a")
 						handle:close()
 
@@ -247,7 +275,9 @@ return {
 						for line in output:gmatch("[^\n]+") do
 							local file = line:sub(4)
 							local arrow = file:find(" -> ", 1, true)
-							if arrow then file = file:sub(arrow + 4) end
+							if arrow then
+								file = file:sub(arrow + 4)
+							end
 							file = file:gsub("%s+$", "")
 							local current = state.path
 							for segment in file:gmatch("([^/]+)/") do
@@ -309,31 +339,45 @@ return {
 				end
 				-- Debounce: avoids flash when rapidly switching buffers (e.g. opening file from neo-tree)
 				follow_timer:stop()
-				follow_timer:start(50, 0, vim.schedule_wrap(function()
-					-- Only follow in normal mode; skip during search, insert, visual, etc.
-					if vim.fn.mode() ~= "n" then return end
-					-- Bail if a float is now active (e.g. telescope)
-					local cur_win = vim.api.nvim_get_current_win()
-					if vim.api.nvim_win_get_config(cur_win).relative ~= "" then return end
-					if vim.bo.buftype ~= "" then return end
-					local ok, manager = pcall(require, "neo-tree.sources.manager")
-					if not ok then return end
-					local state = manager.get_state("filesystem")
-					local ok2, renderer = pcall(require, "neo-tree.ui.renderer")
-					if not ok2 or not renderer.window_exists(state) then return end
-					pcall(function()
-						require("neo-tree.sources.filesystem").navigate(state, state.path, filepath)
+				follow_timer:start(
+					50,
+					0,
+					vim.schedule_wrap(function()
+						-- Only follow in normal mode; skip during search, insert, visual, etc.
+						if vim.fn.mode() ~= "n" then
+							return
+						end
+						-- Bail if a float is now active (e.g. telescope)
+						local cur_win = vim.api.nvim_get_current_win()
+						if vim.api.nvim_win_get_config(cur_win).relative ~= "" then
+							return
+						end
+						if vim.bo.buftype ~= "" then
+							return
+						end
+						local ok, manager = pcall(require, "neo-tree.sources.manager")
+						if not ok then
+							return
+						end
+						local state = manager.get_state("filesystem")
+						local ok2, renderer = pcall(require, "neo-tree.ui.renderer")
+						if not ok2 or not renderer.window_exists(state) then
+							return
+						end
+						pcall(function()
+							require("neo-tree.sources.filesystem").navigate(state, state.path, filepath)
+						end)
+						-- Restore focus if it shifted (fixes search popup close focusing neo-tree)
+						if vim.api.nvim_win_is_valid(cur_win) and vim.api.nvim_get_current_win() ~= cur_win then
+							vim.api.nvim_set_current_win(cur_win)
+						end
 					end)
-					-- Restore focus if it shifted (fixes search popup close focusing neo-tree)
-					if vim.api.nvim_win_is_valid(cur_win) and vim.api.nvim_get_current_win() ~= cur_win then
-						vim.api.nvim_set_current_win(cur_win)
-					end
-				end))
+				)
 			end,
 		})
 
 		-- Keymaps for neo-tree
-		vim.keymap.set('n', '<leader>e', ':Neotree toggle<CR>', { desc = 'Toggle Neo-tree', silent = true })
-		vim.keymap.set('n', '<leader>o', ':Neotree focus<CR>', { desc = 'Focus Neo-tree', silent = true })
+		vim.keymap.set("n", "<leader>e", ":Neotree toggle<CR>", { desc = "Toggle Neo-tree", silent = true })
+		vim.keymap.set("n", "<leader>o", ":Neotree focus<CR>", { desc = "Focus Neo-tree", silent = true })
 	end,
 }
