@@ -95,7 +95,6 @@ vim.api.nvim_create_autocmd("VimEnter", {
 	end,
 })
 
--- Dead process → auto-delete stale swap; live/unknown → confirm popup
 vim.api.nvim_create_autocmd("SwapExists", {
 	group = vim.api.nvim_create_augroup("SmartSwapHandler", { clear = true }),
 	callback = function()
