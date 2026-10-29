@@ -123,8 +123,8 @@ Language servers are auto-installed via Mason:
 
 Completion comes from nvim-cmp with LuaSnip for snippets.
 
-**Formatting** (via Conform, auto-runs on save with 500ms timeout):
-black, isort, rustfmt, clang-format, buildifier, stylua, prettier, shfmt
+**Formatting** (via Conform, auto-runs on save with 2000ms timeout):
+black or ruff, isort, rustfmt, clang-format, buildifier, stylua, prettier, shfmt
 
 `<leader>cF` formats every changed or untracked file, `<leader>cS` only files
 with staged hunks. Both format whole files and leave the result unstaged. An
@@ -132,7 +132,7 @@ open buffer is reloaded from disk first. If it also has unsaved edits, you are
 asked which version to format.
 
 **Linting** (via nvim-lint, runs on BufEnter/BufWrite/InsertLeave):
-flake8, mypy, luacheck, eslint_d, shellcheck, markdownlint-cli2, yamllint, buildifier
+ruff, mypy, luacheck, eslint_d, shellcheck, markdownlint-cli2, yamllint, buildifier
 
 ### Navigation
 
@@ -158,13 +158,10 @@ flake8, mypy, luacheck, eslint_d, shellcheck, markdownlint-cli2, yamllint, build
 - **Vim-fugitive** — git commands from within Neovim
 - **Lazygit** (via Snacks) — full git TUI
 - **DAP** — debugging support
-- **Comment.nvim** — `gc` / `gb` to toggle comments
-- **Vim-tmux-navigator** — seamless pane navigation between tmux and Neovim
+- **Smart-splits** — seamless split navigation between Neovim, tmux and kitty
 - **Mini-pairs** — auto-closes brackets and quotes
 - **Persistence** — session management
 - **Todo-comments** — highlights TODO, FIXME, NOTE, etc.
-- **Claude-code** — Claude Code integration
-- **99** — LLM completion
 
 ---
 
@@ -319,10 +316,9 @@ first.
 
 ### Comments
 
-| Key  | Action               |
-| ---- | -------------------- |
-| `gc` | Toggle line comment  |
-| `gb` | Toggle block comment |
+| Key  | Action                    |
+| ---- | ------------------------- |
+| `gc` | Toggle comment (built in) |
 
 ### Folding
 

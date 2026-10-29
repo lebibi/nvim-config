@@ -11,6 +11,7 @@ Lazy.nvim-based config:
 - **Plugin Specifications**: `lua/plugins/_init.lua` — imports all plugin configs
 - **Individual Plugins**: `lua/plugins/*.lua` — one file per plugin
 - **Configuration**: `lua/config/options.lua`, `lua/config/autocmds.lua` — vim settings and autocommands
+- **Helpers**: `lua/util/*.lua` — plain modules, each with a test in `tests/`
 
 ## Key Configuration Details
 
@@ -20,25 +21,24 @@ Mason auto-installs: pyright, clangd, rust_analyzer, starpls. Custom server conf
 
 ### Formatting (lua/plugins/conform.lua)
 
-Format-on-save enabled (500ms timeout). Supports: Python (black, isort), Rust (rustfmt), C/C++ (clang-format), Bazel (buildifier), Lua (stylua), JS/TS (prettier), shell (shfmt).
+Format-on-save with a 2000ms timeout. Python uses isort and black when the project declares black, otherwise ruff. A project's `.pre-commit-config.yaml` replaces every formatter choice (`lua/util/project_hooks.lua`). `<leader>cF` and `<leader>cS` format changed or staged files through `lua/util/format_files.lua`.
 
 ### Linting (lua/plugins/nvim-lint.lua)
 
-nvim-lint runs on BufEnter/BufWritePost/InsertLeave. Linters: flake8+mypy (Python), luacheck (Lua), eslint_d (JS/TS), shellcheck (sh), markdownlint-cli2, yamllint, buildifier (Bazel).
+nvim-lint runs on BufEnter/BufWritePost/InsertLeave. Linters: ruff+mypy (Python), luacheck (Lua), eslint_d (JS/TS), shellcheck (sh), markdownlint-cli2, yamllint, buildifier (Bazel). Markdown line length is 90 and must match `lua/util/line_limit.lua`.
 
 ### UI Plugins
 
 - **Telescope**: File/grep/buffer search
 - **Neo-tree**: File explorer with git status
 - **Trouble**: Diagnostics panel
-- **Noice** + **Snacks**: Message/notification improvements
+- **Noice** + **Snacks**: Messages, notifications, statuscolumn, images
 - **Flash**: Jump/search motions
 - **Lualine** + **Bufferline**: Status and tab lines
 
-### AI Plugins
+### Keymaps
 
-- **claude-code**: Claude Code integration
-- **99**: LLM completion (ThePrimeagen/99)
+Leader groups follow LazyVim and are declared in `lua/plugins/whichkey.lua`. The README holds the full table.
 
 ## Development Commands
 
@@ -46,6 +46,7 @@ nvim-lint runs on BufEnter/BufWritePost/InsertLeave. Linters: flake8+mypy (Pytho
 - Clean launch (no plugins): `nvim --clean`
 - Plugin management: `:Lazy`
 - Tests: `bazel test //:test_all`
+- Format Lua: `stylua lua tests`
 
 ## See Also
 
