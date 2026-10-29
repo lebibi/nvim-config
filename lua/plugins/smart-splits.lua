@@ -1,15 +1,9 @@
--- Inside tmux, write to the client tty, as tmux drops these escapes
+-- Inside tmux, wrap in tmux passthrough, which needs allow-passthrough on
 local function send_to_kitty(seq)
 	if vim.env.TMUX then
-		local tty = vim.trim(vim.fn.system({ "tmux", "display-message", "-p", "#{client_tty}" }))
-		local f = tty ~= "" and io.open(tty, "w")
-		if f then
-			f:write(seq)
-			f:close()
-		end
-	else
-		vim.api.nvim_ui_send(seq)
+		seq = "\27Ptmux;" .. seq:gsub("\27", "\27\27") .. "\27\\"
 	end
+	vim.api.nvim_ui_send(seq)
 end
 
 local kitty_edge = { left = "left", right = "right", up = "top", down = "bottom" }
